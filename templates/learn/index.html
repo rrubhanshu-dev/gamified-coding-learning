@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Learn - CodeQuest{% endblock %}
+
+{% block content %}
+<div class="learn-container">
+    <div class="container">
+        <h1 class="page-title">📚 Learn</h1>
+        <p class="page-subtitle">Explore courses, subjects, and learning materials</p>
+        
+        {% if enrolled_courses %}
+        <div class="info-box">
+            <p><strong>Enrolled in:</strong> 
+            {% for course in enrolled_courses %}
+                {{ course.name }}{% if not loop.last %}, {% endif %}
+            {% endfor %}
+            </p>
+        </div>
+        {% endif %}
+        
+        {% if subjects %}
+        <section class="learn-section">
+            <h2>Subjects</h2>
+            <div class="subjects-grid">
+                {% for subject in subjects %}
+                <div class="subject-card">
+                    <h3>{{ subject.name }}</h3>
+                    {% if subject.description %}
+                    <p>{{ subject.description }}</p>
+                    {% endif %}
+                    <a href="{{ url_for('view_subject', subject_id=subject.id) }}" class="btn btn-primary">
+                        View Topics →
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+        
+        {% if topics_dict %}
+        <section class="learn-section">
+            <h2>Learning Materials by Topic</h2>
+            <div class="topics-grid">
+                {% for topic, levels in topics_dict.items() %}
+                <div class="topic-card">
+                    <h3>{{ topic }}</h3>
+                    <div class="topic-levels">
+                        {% if levels.beginner > 0 %}
+                        <a href="{{ url_for('learn_topic', topic=topic, level='beginner') }}" class="level-badge level-beginner">
+                            <span class="level-icon">🌱</span>
+                            Beginner
+                            <span class="material-count">({{ levels.beginner }})</span>
+                        </a>
+                        {% endif %}
+                        
+                        {% if levels.intermediate > 0 %}
+                        <a href="{{ url_for('learn_topic', topic=topic, level='intermediate') }}" class="level-badge level-intermediate">
+                            <span class="level-icon">⭐</span>
+                            Intermediate
+                            <span class="material-count">({{ levels.intermediate }})</span>
+                        </a>
+                        {% endif %}
+                        
+                        {% if levels.advanced > 0 %}
+                        <a href="{{ url_for('learn_topic', topic=topic, level='advanced') }}" class="level-badge level-advanced">
+                            <span class="level-icon">🔥</span>
+                            Advanced
+                            <span class="material-count">({{ levels.advanced }})</span>
+                        </a>
+                        {% endif %}
+                    </div>
+                    <a href="{{ url_for('learn_topic', topic=topic) }}" class="btn btn-primary btn-block">
+                        View All Materials
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+        
+        {% if all_materials %}
+        <section class="learn-section">
+            <h2>All Learning Materials</h2>
+            <div class="materials-list">
+                {% for material in all_materials %}
+                <div class="material-card">
+                    <div class="material-header">
+                        <h3>
+                            <a href="{{ url_for('learn_material', material_id=material.id) }}">{{ material.title }}</a>
+                        </h3>
+                        <div class="material-meta">
+                            <span class="badge badge-topic">{{ material.topic }}</span>
+                            <span class="badge badge-level-{{ material.level }}">{{ material.level.title() }}</span>
+                        </div>
+                    </div>
+                    <p class="material-preview">{{ material.content[:150] }}...</p>
+                    <a href="{{ url_for('learn_material', material_id=material.id) }}" class="btn btn-sm btn-primary">
+                        Read More →
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+        
+        {% if not subjects and not topics_dict %}
+        <div class="no-data">
+            <p>No learning content available yet.</p>
+            {% if not enrolled_courses %}
+            <p>You may need to enroll in a course first.</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

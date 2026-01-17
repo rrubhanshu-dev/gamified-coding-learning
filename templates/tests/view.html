@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}{{ test.title }} - Test{% endblock %}
+
+{% block content %}
+<div class="tests-container">
+    <div class="container">
+        <h1 class="page-title">{{ test.title }}</h1>
+        
+        {% if test.description %}
+        <p class="page-subtitle">{{ test.description }}</p>
+        {% endif %}
+        
+        <div class="test-info-card">
+            <h3>Test Information</h3>
+            <ul>
+                <li><strong>Time Limit:</strong> {{ test.time_limit_minutes }} minutes</li>
+                <li><strong>Total Questions:</strong> {{ question_count }}</li>
+                <li><strong>Passing Score:</strong> {{ test.passing_score }}%</li>
+            </ul>
+        </div>
+        
+        {% if attempt and attempt.status == 'completed' %}
+        <div class="alert alert-info">
+            <h4>Your Latest Score: {{ attempt.score }}%</h4>
+            <p>You can retake this test to improve your score.</p>
+            <div class="test-action-buttons">
+                <a href="{{ url_for('test_results', test_id=test.id) }}" class="btn btn-primary">View Results</a>
+                <form method="POST" action="{{ url_for('start_test', test_id=test.id) }}" style="display: inline;">
+                    <button type="submit" class="btn btn-secondary">Retake Test</button>
+                </form>
+            </div>
+        </div>
+        {% elif attempt and attempt.status == 'in_progress' %}
+        <div class="alert alert-warning">
+            <h4>You have an active test attempt.</h4>
+            <a href="{{ url_for('take_test', test_id=test.id) }}" class="btn btn-primary">Continue Test</a>
+            <form method="POST" action="{{ url_for('start_test', test_id=test.id) }}" style="display: inline; margin-left: 10px;">
+                <button type="submit" class="btn btn-secondary" onclick="return confirm('This will start a new attempt. Continue?');">Start New Attempt</button>
+            </form>
+        </div>
+        {% else %}
+        <form method="POST" action="{{ url_for('start_test', test_id=test.id) }}">
+            <div class="alert alert-info">
+                <h4>Test Instructions:</h4>
+                <ul>
+                    <li>You can retake this test multiple times</li>
+                    <li>Time limit: {{ test.time_limit_minutes }} minutes</li>
+                    <li>All answers are saved automatically as you select them</li>
+                    <li>You can review your answers before submitting</li>
+                </ul>
+            </div>
+            <button type="submit" class="btn btn-primary btn-large">Start Test</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

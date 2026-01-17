@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Test Results - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="container">
+        <h1 class="page-title">Test Results: {{ test.title }}</h1>
+        
+        {% if attempts %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Score</th>
+                    <th>Correct</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Submitted</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for attempt in attempts %}
+                <tr>
+                    <td><strong>{{ attempt.username }}</strong></td>
+                    <td>{{ attempt.score }}%</td>
+                    <td>{{ attempt.correct_answers }}</td>
+                    <td>{{ attempt.total_questions }}</td>
+                    <td>
+                        {% if attempt.score >= test.passing_score %}
+                        <span class="badge badge-success">PASSED</span>
+                        {% else %}
+                        <span class="badge badge-danger">FAILED</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ attempt.submitted_at }}</td>
+                    <td>
+                        <a href="#" class="btn btn-sm btn-primary">View Details</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="no-data">
+            <p>No test attempts yet.</p>
+        </div>
+        {% endif %}
+        
+        <div class="back-link">
+            <a href="{{ url_for('admin_tests') }}" class="btn btn-secondary">← Back to Tests</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

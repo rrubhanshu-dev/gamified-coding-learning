@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Topics - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="container">
+        <div class="admin-header">
+            <h1 class="page-title">Manage Topics</h1>
+            <a href="{{ url_for('admin_add_topic') }}" class="btn btn-primary">+ Add Topic</a>
+        </div>
+        
+        <div class="filters-section">
+            <form method="GET" class="filters-form">
+                <div class="filter-group">
+                    <label>Filter by Subject:</label>
+                    <select name="subject_id" class="form-control" onchange="this.form.submit()">
+                        <option value="">All Subjects</option>
+                        {% for subject in subjects %}
+                        <option value="{{ subject.id }}" {% if selected_subject == subject.id|string %}selected{% endif %}>
+                            {{ subject.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+        </div>
+        
+        {% if topics %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Topic Name</th>
+                    <th>Subject</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for topic in topics %}
+                <tr>
+                    <td>{{ topic.id }}</td>
+                    <td><strong>{{ topic.name }}</strong></td>
+                    <td>{{ topic.subject_name }}</td>
+                    <td>{{ topic.description or '-' }}</td>
+                    <td>
+                        <a href="{{ url_for('admin_notes', topic_id=topic.id) }}" class="btn btn-sm btn-primary">View Notes</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="no-data">
+            <p>No topics yet. <a href="{{ url_for('admin_add_topic') }}">Create your first topic!</a></p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

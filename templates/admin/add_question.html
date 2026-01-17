@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Add Question - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="container">
+        <h1 class="page-title">Add New Question</h1>
+        
+        <div class="form-container">
+            <form method="POST" action="{{ url_for('admin_add_question') }}" class="question-form">
+                <div class="form-group">
+                    <label for="title">Question Title *</label>
+                    <input type="text" id="title" name="title" required class="form-control" 
+                           placeholder="e.g., What is the output of this code?">
+                </div>
+                
+                <div class="form-group">
+                    <label for="question_text">Question Text *</label>
+                    <textarea id="question_text" name="question_text" required class="form-control" rows="4"
+                              placeholder="Enter the question description..."></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="option_a">Option A *</label>
+                        <input type="text" id="option_a" name="option_a" required class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="option_b">Option B *</label>
+                        <input type="text" id="option_b" name="option_b" required class="form-control">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="option_c">Option C *</label>
+                        <input type="text" id="option_c" name="option_c" required class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="option_d">Option D *</label>
+                        <input type="text" id="option_d" name="option_d" required class="form-control">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="correct_answer">Correct Answer (A/B/C/D) *</label>
+                        <select id="correct_answer" name="correct_answer" required class="form-control">
+                            <option value="">Select...</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="points">Points *</label>
+                        <input type="number" id="points" name="points" required class="form-control" 
+                               value="10" min="1" max="100">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="subject">Subject *</label>
+                        <input type="text" id="subject" name="subject" required class="form-control" 
+                               value="Python" placeholder="e.g., Python, JavaScript">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="topic">Topic *</label>
+                        <input type="text" id="topic" name="topic" required class="form-control" 
+                               placeholder="e.g., Variables, Loops, Functions">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="difficulty">Difficulty *</label>
+                        <select id="difficulty" name="difficulty" required class="form-control">
+                            <option value="easy">Easy</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="language_track">Programming Language</label>
+                        <select id="language_track" name="language_track" class="form-control">
+                            <option value="python" selected>Python</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="java">Java</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" name="is_active" value="1" checked>
+                        Active (visible to students)
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label for="explanation">Explanation</label>
+                    <textarea id="explanation" name="explanation" class="form-control" rows="3"
+                              placeholder="Explain why this is the correct answer..."></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Add Question</button>
+                    <a href="{{ url_for('admin_questions') }}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

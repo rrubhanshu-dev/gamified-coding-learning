@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Academy Learning - CodeQuest{% endblock %}
+
+{% block content %}
+<div class="academy-container">
+    <div class="container">
+        <h1 class="page-title">📚 Academy Learning Area</h1>
+        <p class="page-subtitle">Browse subjects, topics, and learning materials</p>
+        
+        {% if enrolled_courses %}
+        <div class="info-box">
+            <p><strong>You are enrolled in:</strong> 
+            {% for course in enrolled_courses %}
+                {{ course.name }}{% if not loop.last %}, {% endif %}
+            {% endfor %}
+            </p>
+        </div>
+        {% endif %}
+        
+        {% if subjects %}
+        <div class="subjects-grid">
+            {% for subject in subjects %}
+            <div class="subject-card">
+                <h2 class="subject-title">{{ subject.name }}</h2>
+                {% if subject.description %}
+                <p class="subject-description">{{ subject.description }}</p>
+                {% endif %}
+                <a href="{{ url_for('view_subject', subject_id=subject.id) }}" class="btn btn-primary">
+                    View Topics →
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-data">
+            <p>No subjects available yet.</p>
+            {% if not enrolled_courses %}
+            <p>You may need to enroll in a course first.</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - Admin{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="container">
+        <h1 class="page-title">Analytics & Reporting</h1>
+        
+        <!-- Overall Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>{{ stats.total_users }}</h3>
+                <p>Total Students</p>
+            </div>
+            <div class="stat-card">
+                <h3>{{ stats.total_questions }}</h3>
+                <p>Total Questions</p>
+            </div>
+            <div class="stat-card">
+                <h3>{{ stats.total_attempts }}</h3>
+                <p>Total Attempts</p>
+            </div>
+            <div class="stat-card">
+                <h3>{{ "%.2f"|format(stats.avg_accuracy) }}%</h3>
+                <p>Average Accuracy</p>
+            </div>
+        </div>
+        
+        <!-- Topic Performance -->
+        <div class="analytics-section">
+            <h3>Topic Performance</h3>
+            {% if topic_performance %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Topic</th>
+                        <th>Total Attempts</th>
+                        <th>Correct Attempts</th>
+                        <th>Accuracy</th>
+                        <th>Avg XP</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for topic in topic_performance %}
+                    <tr>
+                        <td><strong>{{ topic.topic }}</strong></td>
+                        <td>{{ topic.total_attempts }}</td>
+                        <td>{{ topic.correct_attempts }}</td>
+                        <td>
+                            {% if topic.total_attempts > 0 %}
+                                {{ "%.2f"|format(topic.correct_attempts / topic.total_attempts * 100) }}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </td>
+                        <td>{{ "%.2f"|format(topic.avg_xp or 0) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="no-data">No topic performance data available.</p>
+            {% endif %}
+        </div>
+        
+        <!-- Difficulty Performance -->
+        <div class="analytics-section">
+            <h3>Difficulty Performance</h3>
+            {% if difficulty_performance %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Difficulty</th>
+                        <th>Total Attempts</th>
+                        <th>Correct Attempts</th>
+                        <th>Accuracy</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for diff in difficulty_performance %}
+                    <tr>
+                        <td><span class="badge badge-{{ diff.difficulty }}">{{ diff.difficulty.title() }}</span></td>
+                        <td>{{ diff.total_attempts }}</td>
+                        <td>{{ diff.correct_attempts }}</td>
+                        <td>
+                            {% if diff.total_attempts > 0 %}
+                                {{ "%.2f"|format(diff.correct_attempts / diff.total_attempts * 100) }}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="no-data">No difficulty performance data available.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

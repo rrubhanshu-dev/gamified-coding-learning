@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Course - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="container">
+        <h1 class="page-title">Edit Course: {{ course.name }}</h1>
+        
+        <div class="form-container">
+            <form method="POST" class="question-form">
+                <div class="form-group">
+                    <label for="name">Course Name *</label>
+                    <input type="text" id="name" name="name" required class="form-control" 
+                           value="{{ course.name }}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" class="form-control" rows="3">{{ course.description or '' }}</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <select id="status" name="status" class="form-control">
+                        <option value="active" {% if course.status == 'active' %}selected{% endif %}>Active</option>
+                        <option value="archived" {% if course.status == 'archived' %}selected{% endif %}>Archived</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Select Subjects *</label>
+                    <div class="subjects-selection" style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 1rem;">
+                        {% for subject in subjects %}
+                        <label style="display: block; padding: 0.5rem; border-bottom: 1px solid #eee;">
+                            <input type="checkbox" name="subject_ids" value="{{ subject.id }}" 
+                                   {% if subject.id in selected_subject_ids %}checked{% endif %}>
+                            <strong>{{ subject.name }}</strong>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Update Course</button>
+                    <a href="{{ url_for('admin_courses') }}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+            
+            <!-- Enroll Students -->
+            <div class="enroll-section" style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #ddd;">
+                <h3>Enrolled Students</h3>
+                {% if enrolled_students %}
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Enrolled At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in enrolled_students %}
+                        <tr>
+                            <td>{{ student.username }}</td>
+                            <td>{{ student.enrolled_at }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="no-data">No students enrolled yet.</p>
+                {% endif %}
+                
+                <h4 style="margin-top: 1rem;">Enroll New Students</h4>
+                <form method="POST" action="{{ url_for('admin_enroll_students', course_id=course.id) }}">
+                    <div class="form-group">
+                        <label>Enter Student User IDs (separated by commas):</label>
+                        <input type="text" name="user_ids" class="form-control" 
+                               placeholder="e.g., 2, 5, 10">
+                        <small>You can find user IDs in the <a href="{{ url_for('admin_users') }}">Users Management</a> page</small>
+                    </div>
+                    {% if all_students %}
+                    <div class="form-group">
+                        <label>Available Students (for reference):</label>
+                        <div style="max-height: 150px; overflow-y: auto; border: 1px solid #ddd; padding: 0.5rem; font-size: 0.9rem;">
+                            {% for student in all_students %}
+                            <div>ID: {{ student.id }} - {{ student.username }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    <button type="submit" class="btn btn-primary">Enroll Students</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

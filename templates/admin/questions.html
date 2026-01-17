@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Questions - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="container">
+        <div class="admin-header">
+            <h1 class="page-title">Manage Questions</h1>
+            <a href="{{ url_for('admin_add_question') }}" class="btn btn-primary">+ Add New Question</a>
+        </div>
+        
+        <!-- Filters -->
+        <div class="filters-section">
+            <form method="GET" action="{{ url_for('admin_questions') }}" class="filters-form">
+                <div class="filter-group">
+                    <label for="subject">Subject:</label>
+                    <select id="subject" name="subject" class="form-control">
+                        <option value="">All Subjects</option>
+                        {% for subj in subjects %}
+                        <option value="{{ subj.subject }}" {% if selected_subject == subj.subject %}selected{% endif %}>
+                            {{ subj.subject }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="topic">Topic:</label>
+                    <select id="topic" name="topic" class="form-control">
+                        <option value="">All Topics</option>
+                        {% for topic in topics %}
+                        <option value="{{ topic.topic }}" {% if selected_topic == topic.topic %}selected{% endif %}>
+                            {{ topic.topic }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="difficulty">Difficulty:</label>
+                    <select id="difficulty" name="difficulty" class="form-control">
+                        <option value="">All Difficulties</option>
+                        {% for diff in difficulties %}
+                        <option value="{{ diff }}" {% if selected_difficulty == diff %}selected{% endif %}>
+                            {{ diff.title() }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>
+                        <input type="checkbox" name="show_inactive" value="1" {% if show_inactive %}checked{% endif %}>
+                        Show Inactive
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <a href="{{ url_for('admin_questions') }}" class="btn btn-secondary">Clear</a>
+            </form>
+        </div>
+        
+        <!-- Questions List - Organized by Subject → Topic → Difficulty -->
+        {% if questions_by_subject %}
+            {% for subject_name, topics_dict in questions_by_subject.items() %}
+            <div class="subject-section" style="margin-bottom: 3rem;">
+                <h2 style="color: var(--primary-color); margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--light-border);">
+                    📚 {{ subject_name }}
+                </h2>
+                
+                {% for topic_name, difficulties_dict in topics_dict.items() %}
+                <div class="topic-section" style="margin-bottom: 2rem; padding-left: 1.5rem;">
+                    <h3 style="color: var(--dark-color); margin-bottom: 1rem; font-size: 1.2rem;">
+                        {{ topic_name }}
+                    </h3>
+                    
+                    {% for diff_level in ['easy', 'medium', 'hard'] %}
+                        {% if difficulties_dict[diff_level] %}
+                        <div class="level-section" style="margin-bottom: 1.5rem;">
+                            <h4 style="color: var(--text-light); margin-bottom: 0.75rem; font-size: 1rem; font-weight: 600;">
+                                {{ diff_level.title() }} ({{ difficulties_dict[diff_level]|length }})
+                            </h4>
+                            
+                            <div class="questions-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1rem;">
+                                {% for question in difficulties_dict[diff_level] %}
+                                <div class="question-card" style="{% if not question.is_active %}opacity: 0.6;{% endif %}">
+                                    <div class="question-header">
+                                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                                            <h4 style="margin: 0; flex: 1;">{{ question.title }}</h4>
+                                            {% if not question.is_active %}
+                                            <span class="badge" style="background: var(--text-muted); margin-left: 0.5rem;">Inactive</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="question-meta" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                                            <span class="badge badge-{{ question.difficulty }}">{{ question.difficulty.title() }}</span>
+                                            <span class="badge badge-points">{{ question.points }} XP</span>
+                                        </div>
+                                    </div>
+                                    <div class="question-actions" style="display: flex; gap: 0.5rem;">
+                                        <a href="{{ url_for('admin_edit_question', question_id=question.id) }}" class="btn btn-sm btn-primary">Edit</a>
+                                        <form method="POST" action="{{ url_for('admin_toggle_question', question_id=question.id) }}" style="display: inline;">
+                                            <button type="submit" class="btn btn-sm {% if question.is_active %}btn-warning{% else %}btn-secondary{% endif %}">
+                                                {% if question.is_active %}Disable{% else %}Enable{% endif %}
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="{{ url_for('admin_delete_question', question_id=question.id) }}" 
+                                              style="display: inline;" onsubmit="return confirm('Delete this question?');">
+                                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        {% elif questions %}
+        <!-- Fallback: Simple table view -->
+        <div class="questions-list">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Subject</th>
+                        <th>Topic</th>
+                        <th>Difficulty</th>
+                        <th>Points</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for question in questions %}
+                    <tr style="{% if not question.is_active %}opacity: 0.6;{% endif %}">
+                        <td>{{ question.id }}</td>
+                        <td><strong>{{ question.title }}</strong></td>
+                        <td>{{ question.get('subject', 'Python') or 'Python' }}</td>
+                        <td><span class="badge badge-topic">{{ question.topic }}</span></td>
+                        <td><span class="badge badge-{{ question.difficulty }}">{{ question.difficulty.title() }}</span></td>
+                        <td>{{ question.points }} XP</td>
+                        <td>
+                            {% if question.is_active %}
+                            <span class="badge badge-success">Active</span>
+                            {% else %}
+                            <span class="badge" style="background: var(--text-muted);">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="actions-cell">
+                            <a href="{{ url_for('admin_edit_question', question_id=question.id) }}" class="btn btn-sm btn-primary">Edit</a>
+                            <form method="POST" action="{{ url_for('admin_toggle_question', question_id=question.id) }}" style="display: inline;">
+                                <button type="submit" class="btn btn-sm {% if question.is_active %}btn-warning{% else %}btn-secondary{% endif %}">
+                                    {% if question.is_active %}Disable{% else %}Enable{% endif %}
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ url_for('admin_delete_question', question_id=question.id) }}" 
+                                  style="display: inline;" onsubmit="return confirm('Delete this question?');">
+                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="no-data">
+            <p>No questions found. <a href="{{ url_for('admin_add_question') }}">Add your first question!</a></p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

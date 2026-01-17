@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}{{ subject.name }} - Academy{% endblock %}
+
+{% block content %}
+<div class="academy-container">
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="{{ url_for('academy_learning') }}">Academy</a> / 
+            <span>{{ subject.name }}</span>
+        </div>
+        
+        <h1 class="page-title">{{ subject.name }}</h1>
+        {% if subject.description %}
+        <p class="page-subtitle">{{ subject.description }}</p>
+        {% endif %}
+        
+        {% if topics %}
+        <div class="topics-list">
+            {% for topic in topics %}
+            <div class="topic-card">
+                <h3>{{ topic.name }}</h3>
+                {% if topic.description %}
+                <p>{{ topic.description }}</p>
+                {% endif %}
+                <a href="{{ url_for('view_topic', topic_id=topic.id) }}" class="btn btn-primary">
+                    View Notes →
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-data">
+            <p>No topics available in this subject yet.</p>
+        </div>
+        {% endif %}
+        
+        <div class="back-link">
+            <a href="{{ url_for('academy_learning') }}" class="btn btn-secondary">← Back to Academy</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

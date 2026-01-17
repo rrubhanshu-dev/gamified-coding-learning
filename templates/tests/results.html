@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Test Results: {{ test.title }}{% endblock %}
+
+{% block content %}
+<div class="tests-container">
+    <div class="container">
+        <h1 class="page-title">Test Results: {{ test.title }}</h1>
+        
+        {% if all_attempts|length > 1 %}
+        <div class="attempt-history">
+            <h3>Your Attempts</h3>
+            <div class="attempts-list">
+                {% for att in all_attempts %}
+                <div class="attempt-item {% if att.id == attempt.id %}active{% endif %}">
+                    <a href="{{ url_for('test_results', test_id=test.id, attempt_id=att.id) }}">
+                        Attempt #{{ loop.index }} - 
+                        {% if att.status == 'completed' %}
+                            Score: {{ att.score }}% ({{ att.correct_answers }}/{{ att.total_questions }})
+                        {% else %}
+                            In Progress
+                        {% endif %}
+                        - {{ att.started_at[:16] }}
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="results-summary">
+            <div class="result-card">
+                <h3>Your Score</h3>
+                <div class="score-display {% if attempt.score >= test.passing_score %}score-pass{% else %}score-fail{% endif %}">
+                    {{ attempt.score }}%
+                </div>
+                <p><strong>{{ attempt.correct_answers }}</strong> out of <strong>{{ attempt.total_questions }}</strong> correct</p>
+                <p>Total Points: <strong>{{ attempt.score * attempt.total_questions / 100 }}</strong> / {{ attempt.total_questions }}</p>
+                {% if attempt.score >= test.passing_score %}
+                <span class="badge badge-success">PASSED ✓</span>
+                {% else %}
+                <span class="badge badge-danger">FAILED ✗</span>
+                <p class="passing-info">Passing Score: {{ test.passing_score }}%</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <h2>Question Review</h2>
+        <div class="answers-review">
+            {% for answer in answers %}
+            <div class="answer-item {% if answer.is_correct == 1 or answer.is_correct == True %}correct-answer{% else %}incorrect-answer{% endif %}">
+                <div class="question-header">
+                    <h4>Question {{ loop.index }} 
+                        <span class="difficulty-badge difficulty-{{ answer.difficulty or 'medium' }}">
+                            {{ (answer.difficulty or 'medium').title() }}
+                        </span>
+                    </h4>
+                    <span class="points-badge">
+                        {{ answer.points_earned }} / {{ answer.question_points or 1 }} points
+                    </span>
+                </div>
+                
+                <div class="question-text">
+                    <p><strong>{{ answer.question_text }}</strong></p>
+                </div>
+                
+                <div class="answer-details">
+                    <div class="answer-option {% if answer.selected_answer == 'A' %}selected{% endif %} {% if answer.correct_answer == 'A' %}correct-option{% endif %}">
+                        <strong>A.</strong> {{ answer.option_a }}
+                        {% if answer.selected_answer == 'A' %}
+                            <span class="your-answer-label">Your Answer</span>
+                        {% endif %}
+                        {% if answer.correct_answer == 'A' %}
+                            <span class="correct-answer-label">✓ Correct Answer</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="answer-option {% if answer.selected_answer == 'B' %}selected{% endif %} {% if answer.correct_answer == 'B' %}correct-option{% endif %}">
+                        <strong>B.</strong> {{ answer.option_b }}
+                        {% if answer.selected_answer == 'B' %}
+                            <span class="your-answer-label">Your Answer</span>
+                        {% endif %}
+                        {% if answer.correct_answer == 'B' %}
+                            <span class="correct-answer-label">✓ Correct Answer</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="answer-option {% if answer.selected_answer == 'C' %}selected{% endif %} {% if answer.correct_answer == 'C' %}correct-option{% endif %}">
+                        <strong>C.</strong> {{ answer.option_c }}
+                        {% if answer.selected_answer == 'C' %}
+                            <span class="your-answer-label">Your Answer</span>
+                        {% endif %}
+                        {% if answer.correct_answer == 'C' %}
+                            <span class="correct-answer-label">✓ Correct Answer</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="answer-option {% if answer.selected_answer == 'D' %}selected{% endif %} {% if answer.correct_answer == 'D' %}correct-option{% endif %}">
+                        <strong>D.</strong> {{ answer.option_d }}
+                        {% if answer.selected_answer == 'D' %}
+                            <span class="your-answer-label">Your Answer</span>
+                        {% endif %}
+                        {% if answer.correct_answer == 'D' %}
+                            <span class="correct-answer-label">✓ Correct Answer</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="answer-feedback">
+                    {% if answer.is_correct == 1 or answer.is_correct == True %}
+                    <div class="feedback-correct">
+                        <strong>✓ Correct!</strong> You selected the right answer.
+                        <p>Your answer <strong>{{ answer.selected_answer }}</strong> matches the correct answer <strong>{{ answer.correct_answer }}</strong>.</p>
+                    </div>
+                    {% else %}
+                    <div class="feedback-incorrect">
+                        <strong>✗ Incorrect</strong>
+                        {% if answer.selected_answer %}
+                        <p>You selected: <strong>{{ answer.selected_answer }}</strong></p>
+                        {% else %}
+                        <p><strong style="color: #f57f17;">⚠ You did not answer this question.</strong></p>
+                        {% endif %}
+                        <p>The correct answer is: <strong>{{ answer.correct_answer }}</strong></p>
+                        {% if answer.selected_answer|upper == answer.correct_answer|upper %}
+                        <p class="warning-note">⚠ Note: Your answer appears to match the correct answer. If you believe this is an error, please contact your instructor.</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="test-actions">
+            <a href="{{ url_for('view_test', test_id=test.id) }}" class="btn btn-primary">Retake Test</a>
+            <a href="{{ url_for('student_tests') }}" class="btn btn-secondary">← Back to Tests</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

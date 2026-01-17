@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}{{ question.title }} - Gamified Coding Learning{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Helper function to escape HTML
+    function escapeHtml(text) {
+        if (!text) return '';
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, m => map[m]);
+    }
+    
+    async function submitAnswer(selectedOption) {
+        const form = document.getElementById('answerForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const resultDiv = document.getElementById('result');
+        
+        // Disable form
+        form.style.pointerEvents = 'none';
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+        
+        // Show loading
+        resultDiv.innerHTML = '<div class="alert alert-info">Processing your answer...</div>';
+        
+        try {
+            const response = await fetch('/submit_answer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    question_id: {{ question.id }},
+                    answer: selectedOption
+                })
+            });
+            
+            // Check if response is OK and is JSON
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            // Check content type
+            const contentType = response.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                const text = await response.text();
+                throw new Error(`Expected JSON but got: ${contentType}. Response: ${text.substring(0, 100)}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Show result
+                if (data.is_correct) {
+                    let xpMessage = '';
+                    if (!data.xp_awarded || data.award_reason === 'already_completed') {
+                        xpMessage = '<p class="warning-text">⚠️ No XP awarded - You have already completed this question correctly before.</p>';
+                    } else {
+                        xpMessage = `<p>You earned <strong>${data.xp_earned} XP</strong></p>`;
+                    }
+                    
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <h4>✓ Correct Answer!</h4>
+                            <p>You selected <strong>${data.selected_answer}. ${data.selected_answer_text}</strong></p>
+                            ${xpMessage}
+                            <p>Your total XP: <strong>${data.new_xp}</strong> (Level ${data.new_level})</p>
+                            ${data.badge_unlocked && data.badge_unlocked.length > 0 ? `<p><strong>🏆 Badge Unlocked: ${Array.isArray(data.badge_unlocked) ? data.badge_unlocked.join(', ') : data.badge_unlocked}</strong></p>` : ''}
+                            <div class="explanation-box">
+                                <h5>Explanation:</h5>
+                                <p>${escapeHtml(data.explanation)}</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <h4>✗ Incorrect Answer</h4>
+                            <p><strong>You selected:</strong> ${data.selected_answer}. ${data.selected_answer_text}</p>
+                            <p class="wrong-reason">❌ This is incorrect because it doesn't match the expected answer.</p>
+                            <div class="correct-answer-box">
+                                <h5>✓ Correct Answer:</h5>
+                                <p><strong>${data.correct_answer}. ${data.correct_answer_text}</strong></p>
+                            </div>
+                            <p>You earned <strong>${data.xp_earned} XP</strong> for attempting (participation points)</p>
+                            <div class="explanation-box">
+                                <h5>Why this is correct:</h5>
+                                <p>${escapeHtml(data.explanation)}</p>
+                            </div>
+                            <p class="tip-text">💡 <strong>Tip:</strong> Review the concept and try again to master it!</p>
+                        </div>
+                    `;
+                }
+                
+                // Disable all radio buttons after submission
+                const radioButtons = document.querySelectorAll('input[name="answer"]');
+                radioButtons.forEach(radio => {
+                    radio.disabled = true;
+                });
+                
+                // Update page after delay
+                setTimeout(() => {
+                    window.location.reload();
+                }, 5000);
+            } else {
+                resultDiv.innerHTML = `<div class="alert alert-danger">Error: ${data.message || 'An error occurred'}</div>`;
+                form.style.pointerEvents = 'auto';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Answer';
+            }
+        } catch (error) {
+            console.error('Error submitting answer:', error);
+            resultDiv.innerHTML = `<div class="alert alert-danger">
+                <h5>Error submitting answer:</h5>
+                <p>${escapeHtml(error.message)}</p>
+                <p class="tip-text">Please check your connection and try again.</p>
+            </div>`;
+            form.style.pointerEvents = 'auto';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Answer';
+        }
+    }
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="question-container">
+    <div class="container">
+        <div class="question-detail">
+            <div class="question-header-section">
+                <h1 class="page-title">{{ question.title }}</h1>
+                <div class="question-meta">
+                    <span class="badge badge-{{ question.difficulty }}">{{ question.difficulty.title() }}</span>
+                    <span class="badge badge-topic">{{ question.topic }}</span>
+                    <span class="badge badge-points">{{ question.points }} XP</span>
+                </div>
+            </div>
+            
+            <div class="question-body">
+                <p class="question-text">{{ question.question_text }}</p>
+                
+                <form id="answerForm">
+                    <div class="answer-options">
+                        <label class="option-label">
+                            <input type="radio" name="answer" value="A" required>
+                            <span class="option-text"><strong>A.</strong> {{ question.option_a }}</span>
+                        </label>
+                        
+                        <label class="option-label">
+                            <input type="radio" name="answer" value="B" required>
+                            <span class="option-text"><strong>B.</strong> {{ question.option_b }}</span>
+                        </label>
+                        
+                        <label class="option-label">
+                            <input type="radio" name="answer" value="C" required>
+                            <span class="option-text"><strong>C.</strong> {{ question.option_c }}</span>
+                        </label>
+                        
+                        <label class="option-label">
+                            <input type="radio" name="answer" value="D" required>
+                            <span class="option-text"><strong>D.</strong> {{ question.option_d }}</span>
+                        </label>
+                    </div>
+                    
+                    <button type="button" id="submitBtn" class="btn btn-primary btn-large" 
+                            onclick="const selected = document.querySelector('input[name=answer]:checked'); if (selected) submitAnswer(selected.value); else alert('Please select an answer');">
+                        Submit Answer
+                    </button>
+                </form>
+                
+                <div id="result"></div>
+            </div>
+            
+            <!-- Previous Attempts -->
+            {% if attempts %}
+            <div class="previous-attempts">
+                <h3>Your Previous Attempts</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Result</th>
+                            <th>XP Earned</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for attempt in attempts %}
+                        <tr>
+                            <td>
+                                {% if attempt.is_correct %}
+                                    <span class="badge badge-success">✓ Correct</span>
+                                {% else %}
+                                    <span class="badge badge-danger">✗ Incorrect</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ attempt.xp_earned }} XP</td>
+                            <td>{{ attempt.attempted_at }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+            
+            <div class="question-actions-footer">
+                <a href="{{ url_for('practice') }}" class="btn btn-secondary">Back to Practice</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

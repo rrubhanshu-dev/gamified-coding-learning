@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Practice - Gamified Coding Learning{% endblock %}
+
+{% block content %}
+<div class="practice-container">
+    <div class="container">
+        <h1 class="page-title">Practice Questions</h1>
+        
+        <!-- Filters -->
+        <div class="filters-section">
+            <form method="GET" action="{{ url_for('practice') }}" class="filters-form">
+                <div class="filter-group">
+                    <label for="topic">Topic:</label>
+                    <select id="topic" name="topic" class="form-control">
+                        <option value="">All Topics</option>
+                        {% for topic in topics %}
+                        <option value="{{ topic.topic }}" {% if selected_topic == topic.topic %}selected{% endif %}>
+                            {{ topic.topic }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="difficulty">Difficulty:</label>
+                    <select id="difficulty" name="difficulty" class="form-control">
+                        <option value="">All Difficulties</option>
+                        {% for diff in difficulties %}
+                        <option value="{{ diff }}" {% if selected_difficulty == diff %}selected{% endif %}>
+                            {{ diff.title() }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <a href="{{ url_for('practice') }}" class="btn btn-secondary">Clear</a>
+            </form>
+        </div>
+        
+        <!-- Questions Organized by Topic -->
+        {% if questions_by_topic and questions_by_topic|length > 0 %}
+            {% for topic_name, topic_questions in questions_by_topic.items() %}
+            <div class="topic-section">
+                <h2 class="topic-heading">
+                    <a href="{{ url_for('learn_topic', topic=topic_name) }}" class="topic-link">📚 {{ topic_name }}</a>
+                </h2>
+                <div class="level-sections">
+                    {% if topic_questions.easy and topic_questions.easy|length > 0 %}
+                    <div class="level-section">
+                        <h3 class="level-heading">🌱 Beginner (Easy)</h3>
+                        <div class="questions-grid">
+                            {% for question in topic_questions.easy %}
+                            <div class="question-card">
+                                <div class="question-header">
+                                    <h4>{{ question.title }}</h4>
+                                    <div class="question-meta">
+                                        <span class="badge badge-easy">{{ question.difficulty.title() }}</span>
+                                        <span class="badge badge-points">{{ question.points }} XP</span>
+                                    </div>
+                                </div>
+                                <a href="{{ url_for('question_detail', question_id=question.id) }}" class="btn btn-primary">
+                                    Attempt Question
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="level-section">
+                        <h3 class="level-heading">🌱 Beginner (Easy)</h3>
+                        <p class="no-questions-level">No questions available for this level yet.</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if topic_questions.medium and topic_questions.medium|length > 0 %}
+                    <div class="level-section">
+                        <h3 class="level-heading">⭐ Intermediate (Medium)</h3>
+                        <div class="questions-grid">
+                            {% for question in topic_questions.medium %}
+                            <div class="question-card">
+                                <div class="question-header">
+                                    <h4>{{ question.title }}</h4>
+                                    <div class="question-meta">
+                                        <span class="badge badge-medium">{{ question.difficulty.title() }}</span>
+                                        <span class="badge badge-points">{{ question.points }} XP</span>
+                                    </div>
+                                </div>
+                                <a href="{{ url_for('question_detail', question_id=question.id) }}" class="btn btn-primary">
+                                    Attempt Question
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="level-section">
+                        <h3 class="level-heading">⭐ Intermediate (Medium)</h3>
+                        <p class="no-questions-level">No questions available for this level yet.</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if topic_questions.hard and topic_questions.hard|length > 0 %}
+                    <div class="level-section">
+                        <h3 class="level-heading">🔥 Advanced (Hard)</h3>
+                        <div class="questions-grid">
+                            {% for question in topic_questions.hard %}
+                            <div class="question-card">
+                                <div class="question-header">
+                                    <h4>{{ question.title }}</h4>
+                                    <div class="question-meta">
+                                        <span class="badge badge-hard">{{ question.difficulty.title() }}</span>
+                                        <span class="badge badge-points">{{ question.points }} XP</span>
+                                    </div>
+                                </div>
+                                <a href="{{ url_for('question_detail', question_id=question.id) }}" class="btn btn-primary">
+                                    Attempt Question
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="level-section">
+                        <h3 class="level-heading">🔥 Advanced (Hard)</h3>
+                        <p class="no-questions-level">No questions available for this level yet.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% elif questions %}
+            <!-- Fallback to simple list if organization not available -->
+            <div class="questions-grid">
+                {% for question in questions %}
+                <div class="question-card">
+                    <div class="question-header">
+                        <h3>{{ question.title }}</h3>
+                        <div class="question-meta">
+                            <span class="badge badge-{{ question.difficulty }}">{{ question.difficulty.title() }}</span>
+                            <span class="badge badge-topic">{{ question.topic }}</span>
+                            <span class="badge badge-points">{{ question.points }} XP</span>
+                        </div>
+                    </div>
+                    <div class="question-actions">
+                        <a href="{{ url_for('question_detail', question_id=question.id) }}" class="btn btn-primary">
+                            Attempt Question
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-data">
+                <p><strong>No questions available yet.</strong></p>
+                <p>To add sample questions, run:</p>
+                <pre style="background: #f5f5f5; padding: 1rem; border-radius: 6px; display: inline-block; margin-top: 0.5rem;"><code>python init_sample_questions.py</code></pre>
+                <p style="margin-top: 1rem;">Or ask an admin to add questions through the admin panel.</p>
+                {% if session.role == 'admin' %}
+                <a href="{{ url_for('admin_add_question') }}" class="btn btn-primary" style="margin-top: 1rem;">
+                    Add Questions Now
+                </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

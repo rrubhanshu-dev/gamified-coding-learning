@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Gamified Coding Learning{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="container">
+        <h1 class="page-title">Dashboard</h1>
+        
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+            <div class="stat-card stat-xp">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-content">
+                    <h3>{{ stats.xp }} XP</h3>
+                    <p>Total Experience</p>
+                </div>
+            </div>
+            
+            <div class="stat-card stat-level">
+                <div class="stat-icon">📊</div>
+                <div class="stat-content">
+                    <h3>Level {{ stats.level }}</h3>
+                    <p>{{ stats.xp_needed }} XP to Level {{ stats.level + 1 }}</p>
+                </div>
+            </div>
+            
+            <div class="stat-card stat-accuracy">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-content">
+                    <h3>{{ stats.accuracy }}%</h3>
+                    <p>Accuracy</p>
+                </div>
+            </div>
+            
+            <div class="stat-card stat-streak">
+                <div class="stat-icon">🔥</div>
+                <div class="stat-content">
+                    <h3>{{ stats.streak }} Days</h3>
+                    <p>Current Streak</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Progress Bar -->
+        <div class="progress-section">
+            <h3>Progress to Next Level</h3>
+            <div class="progress-bar-container">
+                <div class="progress-bar" style="width: {{ (stats.xp_progress / stats.xp_range * 100) if stats.xp_range > 0 else 0 }}%">
+                    <span class="progress-text">{{ stats.xp_progress }} / {{ stats.xp_range }} XP</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Charts Row -->
+        <div class="charts-row">
+            <div class="chart-card">
+                <h3>XP Progress (Last 30 Days)</h3>
+                <canvas id="xpChart"></canvas>
+            </div>
+            
+            <div class="chart-card">
+                <h3>Topic Performance</h3>
+                <canvas id="topicChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Badges Section -->
+        {% if badges %}
+        <div class="badges-section">
+            <h3>Your Badges</h3>
+            <div class="badges-grid">
+                {% for badge in badges %}
+                <div class="badge-item">
+                    <div class="badge-icon">🏆</div>
+                    <div class="badge-info">
+                        <h4>{{ badge.name }}</h4>
+                        <p>{{ badge.description }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Recent Activity -->
+        <div class="recent-activity">
+            <h3>Recent Attempts</h3>
+            {% if recent_attempts %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Question</th>
+                        <th>Topic</th>
+                        <th>Difficulty</th>
+                        <th>Result</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for attempt in recent_attempts %}
+                    <tr>
+                        <td>{{ attempt.title }}</td>
+                        <td><span class="badge badge-topic">{{ attempt.topic }}</span></td>
+                        <td><span class="badge badge-{{ attempt.difficulty }}">{{ attempt.difficulty.title() }}</span></td>
+                        <td>
+                            {% if attempt.is_correct %}
+                                <span class="badge badge-success">✓ Correct</span>
+                            {% else %}
+                                <span class="badge badge-danger">✗ Incorrect</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ attempt.attempted_at }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="no-data">No attempts yet. <a href="{{ url_for('practice') }}">Start practicing!</a></p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // XP Chart
+    const xpData = {{ xp_history | tojson }};
+    const xpLabels = xpData.map(item => item.date || item[0]);
+    const xpValues = xpData.map(item => item.daily_xp || item[1] || 0);
+    
+    const xpCtx = document.getElementById('xpChart').getContext('2d');
+    new Chart(xpCtx, {
+        type: 'line',
+        data: {
+            labels: xpLabels,
+            datasets: [{
+                label: 'Daily XP Earned',
+                data: xpValues,
+                borderColor: '#4CAF50',
+                backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+    
+    // Topic Performance Chart
+    const topicData = {{ topic_stats | tojson }};
+    const topicLabels = topicData.map(item => item.topic || item[0]);
+    const topicCorrect = topicData.map(item => item.correct || item[1] || 0);
+    const topicTotal = topicData.map(item => item.total || item[0] || 1);
+    const topicAccuracy = topicLabels.map((_, i) => 
+        topicTotal[i] > 0 ? (topicCorrect[i] / topicTotal[i] * 100) : 0
+    );
+    
+    const topicCtx = document.getElementById('topicChart').getContext('2d');
+    new Chart(topicCtx, {
+        type: 'bar',
+        data: {
+            labels: topicLabels,
+            datasets: [{
+                label: 'Accuracy %',
+                data: topicAccuracy,
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

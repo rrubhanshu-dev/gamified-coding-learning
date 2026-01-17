@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Courses - CodeQuest{% endblock %}
+
+{% block content %}
+<div class="courses-container">
+    <div class="container">
+        <h1 class="page-title">📚 My Courses</h1>
+        
+        {% if enrolled %}
+        <h2>Enrolled Courses</h2>
+        <div class="courses-grid">
+            {% for course in enrolled %}
+            <div class="course-card">
+                <h3>{{ course.name }}</h3>
+                {% if course.description %}
+                <p>{{ course.description }}</p>
+                {% endif %}
+                <p class="course-meta">Enrolled: {{ course.enrolled_at }}</p>
+                <a href="{{ url_for('learn') }}" class="btn btn-primary">Access Course</a>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        {% if available %}
+        <h2>Available Courses</h2>
+        <div class="courses-grid">
+            {% for course in available %}
+            <div class="course-card">
+                <h3>{{ course.name }}</h3>
+                {% if course.description %}
+                <p>{{ course.description }}</p>
+                {% endif %}
+                <p class="course-meta">Status: {{ course.status.title() }}</p>
+                <p class="info-text">Contact admin to enroll in this course.</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        {% if not enrolled and not available %}
+        <div class="no-data">
+            <p>No courses available at the moment.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

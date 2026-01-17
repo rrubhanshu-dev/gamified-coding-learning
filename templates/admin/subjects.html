@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Subjects - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="container">
+        <div class="admin-header">
+            <h1 class="page-title">Manage Subjects</h1>
+            <a href="{{ url_for('admin_add_subject') }}" class="btn btn-primary">+ Add Subject</a>
+        </div>
+        
+        {% if subjects %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Language</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for subject in subjects %}
+                <tr>
+                    <td>{{ subject.id }}</td>
+                    <td><strong>{{ subject.name }}</strong></td>
+                    <td>{{ subject.description or '-' }}</td>
+                    <td>{{ subject.language_track }}</td>
+                    <td>
+                        <a href="{{ url_for('admin_topics', subject_id=subject.id) }}" class="btn btn-sm btn-primary">View Topics</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="no-data">
+            <p>No subjects yet. <a href="{{ url_for('admin_add_subject') }}">Create your first subject!</a></p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

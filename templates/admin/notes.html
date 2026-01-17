@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Notes - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="container">
+        <div class="admin-header">
+            <h1 class="page-title">Manage Notes</h1>
+            <a href="{{ url_for('admin_add_note') }}" class="btn btn-primary">+ Add Note</a>
+        </div>
+        
+        <div class="filters-section">
+            <form method="GET" class="filters-form">
+                <div class="filter-group">
+                    <label>Filter by Topic:</label>
+                    <select name="topic_id" class="form-control" onchange="this.form.submit()">
+                        <option value="">All Topics</option>
+                        {% for topic in topics %}
+                        <option value="{{ topic.id }}" {% if selected_topic == topic.id|string %}selected{% endif %}>
+                            {{ topic.subject_name }} → {{ topic.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+        </div>
+        
+        {% if notes %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Topic</th>
+                    <th>Subject</th>
+                    <th>Visibility</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for note in notes %}
+                <tr>
+                    <td>{{ note.id }}</td>
+                    <td><strong>{{ note.title }}</strong></td>
+                    <td>{{ note.topic_name }}</td>
+                    <td>{{ note.subject_name }}</td>
+                    <td><span class="badge badge-{{ note.visibility }}">{{ note.visibility.title() }}</span></td>
+                    <td>
+                        <a href="{{ url_for('view_note', note_id=note.id) }}" class="btn btn-sm btn-primary">View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="no-data">
+            <p>No notes yet. <a href="{{ url_for('admin_add_note') }}">Create your first note!</a></p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

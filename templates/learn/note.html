@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}{{ note.title }} - Learn{% endblock %}
+
+{% block content %}
+<div class="learn-container">
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="{{ url_for('learn') }}">Learn</a> / 
+            <a href="{{ url_for('view_subject', subject_id=note.subject_id) }}">{{ note.subject_name }}</a> / 
+            <a href="{{ url_for('view_topic_notes', topic_id=note.topic_id) }}">{{ note.topic_name }}</a> / 
+            <span>{{ note.title }}</span>
+        </div>
+        
+        <div class="note-detail">
+            <h1 class="page-title">{{ note.title }}</h1>
+            <div class="note-meta-full">
+                <span class="badge">{{ note.visibility.title() }}</span>
+                <span class="date">Created: {{ note.created_at }}</span>
+                {% if note.updated_at != note.created_at %}
+                <span class="date">Updated: {{ note.updated_at }}</span>
+                {% endif %}
+            </div>
+            
+            <div class="note-content">
+                {{ note.content | safe }}
+            </div>
+            
+            <div class="note-actions">
+                <a href="{{ url_for('view_topic_notes', topic_id=note.topic_id) }}" class="btn btn-secondary">
+                    ← Back to {{ note.topic_name }}
+                </a>
+                {% if 'Practice Questions' not in note.title and note.topic_name != 'Projects' %}
+                <a href="{{ url_for('practice') }}?topic={{ note.topic_name }}" class="btn btn-primary">
+                    Try Practice Questions →
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

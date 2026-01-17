@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Leaderboard - Gamified Coding Learning{% endblock %}
+
+{% block content %}
+<div class="leaderboard-container">
+    <div class="container">
+        <h1 class="page-title">🏆 Leaderboard</h1>
+        <p class="page-subtitle">Top performers ranked by XP</p>
+        
+        {% if leaderboard %}
+        <div class="leaderboard-table">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Username</th>
+                        <th>XP</th>
+                        <th>Level</th>
+                        <th>Streak</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in leaderboard %}
+                    <tr class="{% if session.user_id == user.id %}current-user{% endif %}">
+                        <td>
+                            {% if loop.index == 1 %}
+                                🥇
+                            {% elif loop.index == 2 %}
+                                🥈
+                            {% elif loop.index == 3 %}
+                                🥉
+                            {% else %}
+                                #{{ loop.index }}
+                            {% endif %}
+                        </td>
+                        <td><strong>{{ user.username }}</strong></td>
+                        <td>{{ user.xp }} XP</td>
+                        <td>Level {{ user.level }}</td>
+                        <td>🔥 {{ user.streak }} days</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="no-data">
+            <p>No leaderboard data available yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

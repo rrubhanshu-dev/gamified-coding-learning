@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Gamified Coding Learning{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="container">
+        <h1 class="page-title">Admin Dashboard</h1>
+        
+        <!-- Admin Stats -->
+        <div class="stats-grid">
+            <div class="stat-card stat-primary">
+                <div class="stat-icon">👥</div>
+                <div class="stat-content">
+                    <h3>{{ total_users }}</h3>
+                    <p>Total Students</p>
+                </div>
+            </div>
+            
+            <div class="stat-card stat-primary">
+                <div class="stat-icon">📝</div>
+                <div class="stat-content">
+                    <h3>{{ total_questions }}</h3>
+                    <p>Total Questions</p>
+                </div>
+            </div>
+            
+            <div class="stat-card stat-primary">
+                <div class="stat-icon">✅</div>
+                <div class="stat-content">
+                    <h3>{{ total_attempts }}</h3>
+                    <p>Total Attempts</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Admin Navigation -->
+        <div class="admin-nav">
+            <h3>Quick Actions</h3>
+            <div class="admin-nav-grid">
+                <div class="nav-section">
+                    <h4>Content Management</h4>
+                    <a href="{{ url_for('admin_questions') }}" class="btn btn-primary">Manage Questions</a>
+                    <a href="{{ url_for('admin_subjects') }}" class="btn btn-primary">Manage Subjects</a>
+                    <a href="{{ url_for('admin_topics') }}" class="btn btn-primary">Manage Topics</a>
+                    <a href="{{ url_for('admin_notes') }}" class="btn btn-primary">Manage Notes</a>
+                </div>
+                <div class="nav-section">
+                    <h4>Tests & Courses</h4>
+                    <a href="{{ url_for('admin_tests') }}" class="btn btn-secondary">Manage Tests</a>
+                    <a href="{{ url_for('admin_courses') }}" class="btn btn-secondary">Manage Courses</a>
+                </div>
+                <div class="nav-section">
+                    <h4>Analytics & Users</h4>
+                    <a href="{{ url_for('admin_analytics') }}" class="btn btn-secondary">View Analytics</a>
+                    <a href="{{ url_for('admin_users') }}" class="btn btn-secondary">Manage Users</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Activity -->
+        <div class="recent-activity">
+            <h3>Recent Activity</h3>
+            {% if recent_attempts %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Question</th>
+                        <th>Result</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for attempt in recent_attempts %}
+                    <tr>
+                        <td>{{ attempt.username }}</td>
+                        <td>{{ attempt.title }}</td>
+                        <td>
+                            {% if attempt.is_correct %}
+                                <span class="badge badge-success">✓ Correct</span>
+                            {% else %}
+                                <span class="badge badge-danger">✗ Incorrect</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ attempt.attempted_at }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="no-data">No recent activity.</p>
+            {% endif %}
+        </div>
+        
+        <!-- User Analytics -->
+        <div class="user-analytics">
+            <h3>Top Users</h3>
+            {% if user_analytics %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>XP</th>
+                        <th>Level</th>
+                        <th>Streak</th>
+                        <th>Questions</th>
+                        <th>Accuracy</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in user_analytics %}
+                    <tr>
+                        <td><strong>{{ user.username }}</strong></td>
+                        <td>{{ user.xp }} XP</td>
+                        <td>Level {{ user.level }}</td>
+                        <td>🔥 {{ user.streak }} days</td>
+                        <td>{{ user.questions_attempted }}</td>
+                        <td>
+                            {% if user.total_attempts > 0 %}
+                                {{ (user.correct_attempts / user.total_attempts * 100) | round(2) }}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="no-data">No user data available.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

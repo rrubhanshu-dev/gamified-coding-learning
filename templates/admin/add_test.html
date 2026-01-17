@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Create Test - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="container">
+        <h1 class="page-title">Create New Test</h1>
+        
+        <div class="form-container">
+            <form method="POST" class="question-form">
+                <div class="form-group">
+                    <label for="title">Test Title *</label>
+                    <input type="text" id="title" name="title" required class="form-control" 
+                           placeholder="e.g., Python Basics Assessment">
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" class="form-control" rows="3"
+                              placeholder="Test description..."></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="subject_id">Subject (Optional)</label>
+                        <select id="subject_id" name="subject_id" class="form-control">
+                            <option value="">No Subject</option>
+                            {% for subject in subjects %}
+                            <option value="{{ subject.id }}">{{ subject.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="time_limit_minutes">Time Limit (minutes) *</label>
+                        <input type="number" id="time_limit_minutes" name="time_limit_minutes" 
+                               required class="form-control" value="60" min="1">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="passing_score">Passing Score (%) *</label>
+                        <input type="number" id="passing_score" name="passing_score" 
+                               required class="form-control" value="50" min="0" max="100">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select id="status" name="status" class="form-control">
+                            <option value="draft">Draft</option>
+                            <option value="published">Published</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" name="assigned_to_all" value="on">
+                        Assign to all students
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label>Select Questions *</label>
+                    <div class="questions-selection" style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 1rem;">
+                        {% for question in questions %}
+                        <label style="display: block; padding: 0.5rem; border-bottom: 1px solid #eee;">
+                            <input type="checkbox" name="question_ids" value="{{ question.id }}">
+                            <strong>{{ question.title }}</strong> - {{ question.topic }} ({{ question.difficulty }})
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Create Test</button>
+                    <a href="{{ url_for('admin_tests') }}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Question - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="container">
+        <h1 class="page-title">Edit Question</h1>
+        
+        <div class="form-container">
+            <form method="POST" action="{{ url_for('admin_edit_question', question_id=question.id) }}" class="question-form">
+                <div class="form-group">
+                    <label for="title">Question Title *</label>
+                    <input type="text" id="title" name="title" required class="form-control" 
+                           value="{{ question.title }}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="question_text">Question Text *</label>
+                    <textarea id="question_text" name="question_text" required class="form-control" rows="4">{{ question.question_text }}</textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="option_a">Option A *</label>
+                        <input type="text" id="option_a" name="option_a" required class="form-control" 
+                               value="{{ question.option_a }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="option_b">Option B *</label>
+                        <input type="text" id="option_b" name="option_b" required class="form-control"
+                               value="{{ question.option_b }}">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="option_c">Option C *</label>
+                        <input type="text" id="option_c" name="option_c" required class="form-control"
+                               value="{{ question.option_c }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="option_d">Option D *</label>
+                        <input type="text" id="option_d" name="option_d" required class="form-control"
+                               value="{{ question.option_d }}">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="correct_answer">Correct Answer (A/B/C/D) *</label>
+                        <select id="correct_answer" name="correct_answer" required class="form-control">
+                            <option value="A" {% if question.correct_answer == 'A' %}selected{% endif %}>A</option>
+                            <option value="B" {% if question.correct_answer == 'B' %}selected{% endif %}>B</option>
+                            <option value="C" {% if question.correct_answer == 'C' %}selected{% endif %}>C</option>
+                            <option value="D" {% if question.correct_answer == 'D' %}selected{% endif %}>D</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="points">Points *</label>
+                        <input type="number" id="points" name="points" required class="form-control" 
+                               value="{{ question.points }}" min="1" max="100">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="difficulty">Difficulty *</label>
+                        <select id="difficulty" name="difficulty" required class="form-control">
+                            <option value="easy" {% if question.difficulty == 'easy' %}selected{% endif %}>Easy</option>
+                            <option value="medium" {% if question.difficulty == 'medium' %}selected{% endif %}>Medium</option>
+                            <option value="hard" {% if question.difficulty == 'hard' %}selected{% endif %}>Hard</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="topic">Topic *</label>
+                        <input type="text" id="topic" name="topic" required class="form-control" 
+                               value="{{ question.topic }}">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="language_track">Programming Language</label>
+                    <select id="language_track" name="language_track" class="form-control">
+                        <option value="python" {% if question.language_track == 'python' %}selected{% endif %}>Python</option>
+                        <option value="javascript" {% if question.language_track == 'javascript' %}selected{% endif %}>JavaScript</option>
+                        <option value="java" {% if question.language_track == 'java' %}selected{% endif %}>Java</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="explanation">Explanation</label>
+                    <textarea id="explanation" name="explanation" class="form-control" rows="3">{{ question.explanation or '' }}</textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Update Question</button>
+                    <a href="{{ url_for('admin_questions') }}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

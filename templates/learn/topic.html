@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}{{ topic }} - Learn{% endblock %}
+
+{% block content %}
+<div class="learn-container">
+    <div class="container">
+        <div class="topic-header">
+            <h1 class="page-title">📚 {{ topic }}</h1>
+            <div class="topic-filter">
+                <a href="{{ url_for('learn_topic', topic=topic) }}" 
+                   class="btn btn-sm {% if not selected_level %}btn-primary{% else %}btn-secondary{% endif %}">
+                    All Levels
+                </a>
+                <a href="{{ url_for('learn_topic', topic=topic, level='beginner') }}" 
+                   class="btn btn-sm {% if selected_level == 'beginner' %}btn-primary{% else %}btn-secondary{% endif %}">
+                    🌱 Beginner
+                </a>
+                <a href="{{ url_for('learn_topic', topic=topic, level='intermediate') }}" 
+                   class="btn btn-sm {% if selected_level == 'intermediate' %}btn-primary{% else %}btn-secondary{% endif %}">
+                    ⭐ Intermediate
+                </a>
+                <a href="{{ url_for('learn_topic', topic=topic, level='advanced') }}" 
+                   class="btn btn-sm {% if selected_level == 'advanced' %}btn-primary{% else %}btn-secondary{% endif %}">
+                    🔥 Advanced
+                </a>
+            </div>
+        </div>
+        
+        <!-- Learning Materials -->
+        {% if materials %}
+        <div class="materials-section">
+            <h2>📖 Learning Materials</h2>
+            <div class="materials-list">
+                {% for material in materials %}
+                <div class="material-card">
+                    <div class="material-header">
+                        <h3>
+                            <a href="{{ url_for('learn_material', material_id=material.id) }}">{{ material.title }}</a>
+                        </h3>
+                        <span class="badge badge-level-{{ material.level }}">{{ material.level.title() }}</span>
+                    </div>
+                    <div class="material-content-preview">
+                        {{ material.content[:200] | safe }}...
+                    </div>
+                    <a href="{{ url_for('learn_material', material_id=material.id) }}" class="btn btn-sm btn-primary">
+                        Read Full Article →
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Practice Questions -->
+        {% if questions %}
+        <div class="questions-section">
+            <h2>🎯 Practice Questions</h2>
+            <p class="section-description">Test your knowledge with questions on {{ topic }}</p>
+            <div class="questions-grid">
+                {% for question in questions %}
+                <div class="question-card">
+                    <div class="question-header">
+                        <h3>{{ question.title }}</h3>
+                        <div class="question-meta">
+                            <span class="badge badge-{{ question.difficulty }}">{{ question.difficulty.title() }}</span>
+                            <span class="badge badge-points">{{ question.points }} XP</span>
+                        </div>
+                    </div>
+                    <p class="question-text-preview">{{ question.question_text[:100] }}...</p>
+                    <a href="{{ url_for('question_detail', question_id=question.id) }}" class="btn btn-primary">
+                        Attempt Question
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div class="no-data">
+            <p>No questions available for this topic yet.</p>
+        </div>
+        {% endif %}
+        
+        <div class="back-link">
+            <a href="{{ url_for('learn') }}" class="btn btn-secondary">← Back to Learning Area</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

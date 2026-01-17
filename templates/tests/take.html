@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Taking Test: {{ test.title }}{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-save answers with immediate feedback
+    function saveAnswer(questionId, answer) {
+        // Send the answer as-is (A, B, C, D) - backend will handle comparison
+        const answerValue = answer.trim();
+        
+        console.log(`Saving answer for question ${questionId}: ${answerValue}`);
+        
+        fetch('/test/{{ test.id }}/submit_answer', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({question_id: questionId, answer: answerValue})
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Answer saved:', data);
+            if (data.success) {
+                // Find the question card
+                const checkedInput = document.querySelector(`input[name="answer_${questionId}"]:checked`);
+                if (!checkedInput) {
+                    console.error('Could not find checked input for question', questionId);
+                    return;
+                }
+                
+                const questionCard = checkedInput.closest('.question-card');
+                if (!questionCard) {
+                    console.error('Could not find question card');
+                    return;
+                }
+                
+                // Remove existing feedback
+                const existingFeedback = questionCard.querySelector('.answer-feedback');
+                if (existingFeedback) {
+                    existingFeedback.remove();
+                }
+                
+                // Check if answer is correct
+                const isCorrect = data.is_correct === 1 || data.is_correct === true || data.is_correct === '1';
+                
+                if (isCorrect) {
+                    questionCard.classList.add('answered-correct');
+                    questionCard.classList.remove('answered-incorrect');
+                    // Show success message
+                    const feedbackDiv = document.createElement('div');
+                    feedbackDiv.className = 'answer-feedback correct-feedback';
+                    feedbackDiv.innerHTML = `<strong style="color: #4CAF50;">✓ Correct!</strong> <span style="color: #666; font-size: 0.9em;">Your answer "${data.selected_answer}" is correct.</span>`;
+                    questionCard.appendChild(feedbackDiv);
+                } else {
+                    questionCard.classList.add('answered-incorrect');
+                    questionCard.classList.remove('answered-correct');
+                    // Show error message with correct answer
+                    const feedbackDiv = document.createElement('div');
+                    feedbackDiv.className = 'answer-feedback incorrect-feedback';
+                    feedbackDiv.innerHTML = `<strong style="color: #f44336;">✗ Incorrect</strong><br>
+                        <span style="color: #666;">You selected: <strong>${data.selected_answer}</strong></span><br>
+                        <span style="color: #4CAF50;">Correct answer: <strong>${data.correct_answer}</strong></span>`;
+                    questionCard.appendChild(feedbackDiv);
+                }
+            } else {
+                console.error('Error saving answer:', data.message);
+                alert('Error saving answer: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error saving answer:', error);
+            alert('Error saving answer. Please try again.');
+        });
+    }
+    
+    // Timer (if time limit exists)
+    {% if test.time_limit_minutes %}
+    let timeLeft = {{ test.time_limit_minutes }} * 60;
+    const timer = setInterval(() => {
+        timeLeft--;
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        document.getElementById('timer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            alert('Time is up! Submitting test...');
+            document.getElementById('finishForm').submit();
+        }
+    }, 1000);
+    {% endif %}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="tests-container">
+    <div class="container">
+        <div class="test-header">
+            <h1>{{ test.title }}</h1>
+            {% if test.time_limit_minutes %}
+            <div class="timer-display">
+                <strong>Time Remaining:</strong> <span id="timer">{{ test.time_limit_minutes }}:00</span>
+            </div>
+            {% endif %}
+        </div>
+        
+        <form id="finishForm" method="POST" action="{{ url_for('finish_test', test_id=test.id) }}">
+            <div class="questions-list">
+                {% for question in questions %}
+                <div class="question-card">
+                    <h3>Question {{ loop.index }}</h3>
+                    <p class="question-text">{{ question.question_text }}</p>
+                    
+                    <div class="answer-options">
+                        <label class="option-label">
+                            <input type="radio" name="answer_{{ question.id }}" value="A" 
+                                   {% if answered.get(question.id) == 'A' %}checked{% endif %}
+                                   onchange="saveAnswer({{ question.id }}, 'A')">
+                            <span><strong>A.</strong> {{ question.option_a }}</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="answer_{{ question.id }}" value="B"
+                                   {% if answered.get(question.id) == 'B' %}checked{% endif %}
+                                   onchange="saveAnswer({{ question.id }}, 'B')">
+                            <span><strong>B.</strong> {{ question.option_b }}</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="answer_{{ question.id }}" value="C"
+                                   {% if answered.get(question.id) == 'C' %}checked{% endif %}
+                                   onchange="saveAnswer({{ question.id }}, 'C')">
+                            <span><strong>C.</strong> {{ question.option_c }}</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="answer_{{ question.id }}" value="D"
+                                   {% if answered.get(question.id) == 'D' %}checked{% endif %}
+                                   onchange="saveAnswer({{ question.id }}, 'D')">
+                            <span><strong>D.</strong> {{ question.option_d }}</span>
+                        </label>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="test-actions">
+                <button type="submit" class="btn btn-primary btn-large" onclick="return confirm('Are you sure you want to submit? You cannot change answers after submission.');">
+                    Submit Test
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

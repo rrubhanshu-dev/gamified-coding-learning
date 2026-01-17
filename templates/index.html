@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Gamified Coding Learning{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title">🎮 Welcome to CodeQuest</h1>
+            <p class="hero-subtitle">Learn Coding Through Gamification</p>
+            <p class="hero-description">
+                Master programming concepts with interactive questions, earn XP, level up, 
+                collect badges, and compete on the leaderboard. Make learning fun and engaging!
+            </p>
+            <div class="hero-buttons">
+                {% if not session.user_id %}
+                    <a href="{{ url_for('register') }}" class="btn btn-primary btn-large">Get Started</a>
+                    <a href="{{ url_for('login') }}" class="btn btn-secondary btn-large">Login</a>
+                {% else %}
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-large">Go to Dashboard</a>
+                    <a href="{{ url_for('practice') }}" class="btn btn-secondary btn-large">Start Practicing</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="features-section">
+    <div class="container">
+        <h2 class="section-title">Features</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h3>Practice Questions</h3>
+                <p>MCQ-based coding logic questions with multiple difficulty levels</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⭐</div>
+                <h3>Earn XP & Level Up</h3>
+                <p>Gain experience points with each question and advance through levels</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🏆</div>
+                <h3>Badges & Achievements</h3>
+                <p>Unlock badges as you reach milestones and maintain streaks</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Track Progress</h3>
+                <p>View detailed analytics and performance charts on your dashboard</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔥</div>
+                <h3>Daily Streaks</h3>
+                <p>Maintain daily practice streaks and earn bonus rewards</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">👑</div>
+                <h3>Leaderboard</h3>
+                <p>Compete with other learners and climb the rankings</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
