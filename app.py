@@ -5,7 +5,7 @@ Main Flask Application Entry Point
 Author: Your Name
 Date: 2024
 """
-
+from seed_data import seed_all
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -21,6 +21,27 @@ from logic import (calculate_xp, check_level_up, update_streak, check_badge_unlo
 
 # Initialize Flask app
 app = Flask(__name__)
+from database import init_db, get_db
+
+def initialize_app():
+    init_db()
+    db = get_db()
+
+    try:
+        cursor = db.execute("SELECT COUNT(*) as count FROM subjects")
+        count = cursor.fetchone()["count"]
+    except Exception:
+        count = 0
+
+    if count == 0:
+        print("⚠️ Database empty. Seeding data...")
+        seed_all()
+        print("✅ Database seeded successfully")
+    else:
+        print("ℹ️ Database already contains data")
+
+initialize_app()
+
 app.secret_key = 'your-secret-key-change-in-production-2024-gamified-coding'
 
 # Configuration
