@@ -29,27 +29,31 @@ def initialize_app():
     db = get_db()
 
     try:
-        # Check if database is empty by checking users table count
-        cursor = db.execute("SELECT COUNT(*) as count FROM users")
-        count = cursor.fetchone()["count"]
+        # Check if database is empty by checking tests table count
+        # This is more reliable than checking users since admin is created during seeding
+        cursor = db.execute("SELECT COUNT(*) as count FROM tests")
+        test_count = cursor.fetchone()["count"]
     except Exception as e:
         print(f"⚠️ Error checking database: {e}")
-        count = 0
+        test_count = 0
 
-    if count == 0:
+    if test_count == 0:
         print("=" * 60)
-        print("⚠️ Database is empty. Starting auto-seeding...")
+        print("⚠️ Database is empty (no tests found). Starting auto-seeding...")
         print("=" * 60)
         try:
             seed_all()
             print("=" * 60)
             print("✅ Database seeded successfully!")
+            print("   - Tests, questions, and learning materials are now available")
             print("=" * 60)
         except Exception as e:
             print(f"❌ Error during seeding: {e}")
+            import traceback
+            traceback.print_exc()
             raise
     else:
-        print(f"ℹ️ Database already contains {count} user(s). Skipping seed.")
+        print(f"ℹ️ Database already contains {test_count} test(s). Skipping seed.")
 
 initialize_app()
 
