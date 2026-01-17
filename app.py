@@ -1304,20 +1304,23 @@ def student_tests():
     db = get_db()
     user_id = session['user_id']
     
-    # Get tests assigned to this user or all students
-    # Show all published tests that are either:
-    # 1. Assigned to all students (assigned_to_all = 1), OR
-    # 2. Specifically assigned to this user (in test_assignments)
+    # Get all published tests for students
+    # Show all tests with status = 'published' to all logged-in students
+    # Include attempt count for each test
     tests = db.execute(
-        '''SELECT DISTINCT t.*, 
+        '''SELECT t.*, 
                   (SELECT COUNT(*) FROM test_attempts ta WHERE ta.test_id = t.id AND ta.user_id = ?) as attempt_count
            FROM tests t
-           LEFT JOIN test_assignments ta ON t.id = ta.test_id AND ta.user_id = ?
            WHERE t.status = 'published'
-             AND (t.assigned_to_all = 1 OR ta.user_id IS NOT NULL)
            ORDER BY t.created_at DESC''',
-        (user_id, user_id)
+        (user_id,)
     ).fetchall()
+    
+    # Debug logging (temporary - can be removed after verification)
+    if app.debug:
+        total_tests = db.execute('SELECT COUNT(*) as count FROM tests').fetchone()['count']
+        published_tests = db.execute("SELECT COUNT(*) as count FROM tests WHERE status = 'published'").fetchone()['count']
+        print(f"DEBUG: student_tests - Total tests in DB: {total_tests}, Published: {published_tests}, Returned: {len(tests)}")
     
     return render_template('tests/list.html', tests=tests)
 
