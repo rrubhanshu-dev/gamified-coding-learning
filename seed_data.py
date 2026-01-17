@@ -5,6 +5,7 @@ Combines all data seeding functions into one file
 
 from database import init_db, get_db
 from datetime import datetime
+from werkzeug.security import generate_password_hash
 
 def init_demo_data():
     """Add demo data for academy, courses, and tests"""
@@ -4576,21 +4577,74 @@ run_quiz()
 
 
 def seed_all():
-    """Run all seeding functions"""
+    """Run all seeding functions and create admin user"""
     print("Starting data seeding...")
     print("=" * 60)
     
+    # Run all seed functions
+    print("\n[1/9] Seeding demo data...")
     init_demo_data()
+    
+    print("\n[2/9] Seeding learning materials...")
     init_learning_materials()
+    
+    print("\n[3/9] Seeding sample questions...")
     init_sample_questions()
+    
+    print("\n[4/9] Seeding bulk questions...")
     seed_bulk_questions()
+    
+    print("\n[5/9] Seeding complete questions...")
     seed_complete_questions()
+    
+    print("\n[6/9] Seeding learning notes...")
     seed_learning_notes()
+    
+    print("\n[7/9] Seeding practice questions...")
     seed_practice_questions()
+    
+    print("\n[8/9] Seeding projects...")
     seed_projects()
     
+    # Create admin user if it doesn't exist
+    print("\n[9/9] Creating admin user...")
+    db = get_db()
+    try:
+        # Check if admin user already exists
+        admin_check = db.execute(
+            "SELECT id FROM users WHERE username = ? OR role = ?",
+            ('admin', 'admin')
+        ).fetchone()
+        
+        if not admin_check:
+            # Create admin user with hashed password
+            hashed_password = generate_password_hash('admin123')
+            cursor = db.execute(
+                '''INSERT INTO users (username, email, password, role, language_track, created_at)
+                   VALUES (?, ?, ?, ?, ?, ?)''',
+                ('admin', 'admin@example.com', hashed_password, 'admin', 'python', datetime.now())
+            )
+            db.commit()
+            admin_id = cursor.lastrowid
+            
+            # Initialize admin stats
+            db.execute(
+                '''INSERT INTO user_stats (user_id, xp, level, streak, last_activity_date)
+                   VALUES (?, 0, 1, 0, ?)''',
+                (admin_id, datetime.now().date())
+            )
+            db.commit()
+            
+            print("   ✅ Admin user created: username='admin', password='admin123'")
+        else:
+            print("   ℹ️ Admin user already exists. Skipping creation.")
+    except Exception as e:
+        print(f"   ⚠️ Error creating admin user: {e}")
+        db.rollback()
+    
+    print("\n" + "=" * 60)
+    print("✅ All seeding complete!")
     print("=" * 60)
-    print("All seeding complete!")
 
 
 if __name__ == '__main__':

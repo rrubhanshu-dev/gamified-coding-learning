@@ -24,21 +24,32 @@ app = Flask(__name__)
 from database import init_db, get_db
 
 def initialize_app():
+    """Initialize database and auto-seed if empty (cloud-safe)"""
     init_db()
     db = get_db()
 
     try:
-        cursor = db.execute("SELECT COUNT(*) as count FROM subjects")
+        # Check if database is empty by checking users table count
+        cursor = db.execute("SELECT COUNT(*) as count FROM users")
         count = cursor.fetchone()["count"]
-    except Exception:
+    except Exception as e:
+        print(f"⚠️ Error checking database: {e}")
         count = 0
 
     if count == 0:
-        print("⚠️ Database empty. Seeding data...")
-        seed_all()
-        print("✅ Database seeded successfully")
+        print("=" * 60)
+        print("⚠️ Database is empty. Starting auto-seeding...")
+        print("=" * 60)
+        try:
+            seed_all()
+            print("=" * 60)
+            print("✅ Database seeded successfully!")
+            print("=" * 60)
+        except Exception as e:
+            print(f"❌ Error during seeding: {e}")
+            raise
     else:
-        print("ℹ️ Database already contains data")
+        print(f"ℹ️ Database already contains {count} user(s). Skipping seed.")
 
 initialize_app()
 
@@ -52,8 +63,7 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 # Create upload folder if it doesn't exist
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Initialize database
-init_db()
+# Database is already initialized by initialize_app() above
 
 
 # ==================== UTILITY FUNCTIONS ====================
