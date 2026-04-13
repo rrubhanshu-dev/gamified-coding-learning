@@ -418,7 +418,7 @@ while count < 5:
             else:
                 print("   [WARNING] Could not create test")
         else:
-            print("   [WARNING] No questions found in database. Please run init_sample_questions.py first.")
+            print("   [WARNING] No questions found in database. Please seed questions first (e.g. run 'python seed_data.py').")
     except Exception as e:
         print(f"   [ERROR] Error creating test: {str(e)}")
     
@@ -448,7 +448,7 @@ while count < 5:
     print(f"   4. Admin can manage all content from Admin Dashboard")
     
     print("\n[INFO] Note: Make sure you have questions in the database.")
-    print("   Run: python init_sample_questions.py (if not already done)")
+    print("   For a full demo setup (including questions), run: python seed_data.py")
 
 
 
@@ -2750,6 +2750,221 @@ def seed_complete_questions():
             'explanation': 'Recursively adds first element to sum of rest: 1 + sum([2,3]) = 1 + 2 + sum([3]) = 1 + 2 + 3 = 6.',
             'difficulty': 'hard',
             'topic': 'Recursion',
+            'subject': 'Python',
+            'points': 20
+        },
+        # ========== BASIC ERROR HANDLING (fill missing levels) ==========
+        {
+            'title': 'Handling ZeroDivisionError',
+            'question_text': 'What is printed?\n\ntry:\n    x = 10 / 0\n    print("OK")\nexcept ZeroDivisionError:\n    print("Error")',
+            'option_a': 'OK',
+            'option_b': 'Error',
+            'option_c': 'ZeroDivisionError',
+            'option_d': 'Nothing',
+            'correct_answer': 'B',
+            'explanation': 'Division by zero raises ZeroDivisionError, so the except block prints "Error".',
+            'difficulty': 'easy',
+            'topic': 'Basic Error Handling',
+            'subject': 'Python',
+            'points': 10
+        },
+        {
+            'title': 'Multiple Except Blocks',
+            'question_text': 'Which except block will run?\n\ntry:\n    value = int("abc")\nexcept ZeroDivisionError:\n    print("Zero")\nexcept ValueError:\n    print("Value")',
+            'option_a': 'Zero',
+            'option_b': 'Value',
+            'option_c': 'Both',
+            'option_d': 'None',
+            'correct_answer': 'B',
+            'explanation': 'int(\"abc\") raises ValueError, so the ValueError block runs.',
+            'difficulty': 'medium',
+            'topic': 'Basic Error Handling',
+            'subject': 'Python',
+            'points': 15
+        },
+        {
+            'title': 'Finally Block Execution',
+            'question_text': 'What is the output?\n\ntry:\n    x = 1 / 0\nexcept ZeroDivisionError:\n    print("Handled")\nfinally:\n    print("Cleanup")',
+            'option_a': 'Handled',
+            'option_b': 'Cleanup',
+            'option_c': 'Handled\\nCleanup',
+            'option_d': 'ZeroDivisionError',
+            'correct_answer': 'C',
+            'explanation': 'The except block runs, then finally runs always, so both lines are printed.',
+            'difficulty': 'hard',
+            'topic': 'Basic Error Handling',
+            'subject': 'Python',
+            'points': 20
+        },
+        # ========== CONDITIONALS ==========
+        {
+            'title': 'If Statement Basics',
+            'question_text': 'What is the output?\n\nx = 5\nif x > 3:\n    print("Hi")',
+            'option_a': 'Hi',
+            'option_b': 'Nothing',
+            'option_c': 'Error',
+            'option_d': '5',
+            'correct_answer': 'A',
+            'explanation': 'Since x is greater than 3, the body of the if statement runs.',
+            'difficulty': 'easy',
+            'topic': 'Conditionals',
+            'subject': 'Python',
+            'points': 10
+        },
+        {
+            'title': 'If Elif Else',
+            'question_text': 'What is the output?\n\nscore = 75\nif score >= 90:\n    print("A")\nelif score >= 60:\n    print("Pass")\nelse:\n    print("Fail")',
+            'option_a': 'A',
+            'option_b': 'Pass',
+            'option_c': 'Fail',
+            'option_d': 'Nothing',
+            'correct_answer': 'B',
+            'explanation': '75 is not >= 90 but is >= 60, so the elif prints "Pass".',
+            'difficulty': 'medium',
+            'topic': 'Conditionals',
+            'subject': 'Python',
+            'points': 15
+        },
+        {
+            'title': 'Nested Conditionals',
+            'question_text': 'What is the output?\n\nx = 10\ny = 5\nif x > 0:\n    if y > 10:\n        print("A")\n    else:\n        print("B")',
+            'option_a': 'A',
+            'option_b': 'B',
+            'option_c': 'Nothing',
+            'option_d': 'Error',
+            'correct_answer': 'B',
+            'explanation': 'Outer if is True, inner if is False, so the else prints "B".',
+            'difficulty': 'hard',
+            'topic': 'Conditionals',
+            'subject': 'Python',
+            'points': 20
+        },
+        # ========== DATA STRUCTURES / DATA TYPES ==========
+        {
+            'title': 'Identify Data Type',
+            'question_text': 'What is the type of value?\n\nvalue = [1, 2, 3]',
+            'option_a': 'int',
+            'option_b': 'list',
+            'option_c': 'tuple',
+            'option_d': 'set',
+            'correct_answer': 'B',
+            'explanation': 'Square brackets create a list literal in Python.',
+            'difficulty': 'easy',
+            'topic': 'Data Types',
+            'subject': 'Python',
+            'points': 10
+        },
+        {
+            'title': 'Mutable vs Immutable',
+            'question_text': 'Which of these is mutable?\n\nA. int\nB. str\nC. list\nD. tuple',
+            'option_a': 'A',
+            'option_b': 'B',
+            'option_c': 'C',
+            'option_d': 'D',
+            'correct_answer': 'C',
+            'explanation': 'Lists are mutable; ints, strings, and tuples are immutable.',
+            'difficulty': 'medium',
+            'topic': 'Data Structures',
+            'subject': 'Python',
+            'points': 15
+        },
+        {
+            'title': 'Choosing the Right Structure',
+            'question_text': 'You need to store unique student IDs and test membership quickly. Which type is best?',
+            'option_a': 'list',
+            'option_b': 'dict',
+            'option_c': 'set',
+            'option_d': 'tuple',
+            'correct_answer': 'C',
+            'explanation': 'A set stores unique items and supports fast membership tests.',
+            'difficulty': 'hard',
+            'topic': 'Data Structures',
+            'subject': 'Python',
+            'points': 20
+        },
+        # ========== FILE HANDLING ==========
+        {
+            'title': 'Opening a File',
+            'question_text': 'Which mode opens a file for reading text (default)?',
+            'option_a': '\"r\"',
+            'option_b': '\"w\"',
+            'option_c': '\"a\"',
+            'option_d': '\"rb\"',
+            'correct_answer': 'A',
+            'explanation': '\"r\" is the default mode and opens a text file for reading.',
+            'difficulty': 'easy',
+            'topic': 'File Handling',
+            'subject': 'Python',
+            'points': 10
+        },
+        {
+            'title': 'Using with Statement',
+            'question_text': 'What is the main advantage of using:\n\nwith open(\"data.txt\") as f:\n    content = f.read()',
+            'option_a': 'It runs faster',
+            'option_b': 'It automatically closes the file',
+            'option_c': 'It reads binary data',
+            'option_d': 'It creates the file',
+            'correct_answer': 'B',
+            'explanation': 'The with statement ensures the file is closed automatically, even if errors occur.',
+            'difficulty': 'medium',
+            'topic': 'File Handling',
+            'subject': 'Python',
+            'points': 15
+        },
+        {
+            'title': 'Appending to a File',
+            'question_text': 'Which mode should you use to add text to the end of an existing file?',
+            'option_a': '\"r\"',
+            'option_b': '\"w\"',
+            'option_c': '\"a\"',
+            'option_d': '\"x\"',
+            'correct_answer': 'C',
+            'explanation': '\"a\" opens the file in append mode, writing at the end without truncating.',
+            'difficulty': 'hard',
+            'topic': 'File Handling',
+            'subject': 'Python',
+            'points': 20
+        },
+        # ========== OOP BASICS ==========
+        {
+            'title': 'Defining a Class',
+            'question_text': 'Which keyword is used to define a class in Python?',
+            'option_a': 'function',
+            'option_b': 'class',
+            'option_c': 'object',
+            'option_d': 'def',
+            'correct_answer': 'B',
+            'explanation': 'Classes are defined with the class keyword.',
+            'difficulty': 'easy',
+            'topic': 'OOP Basics',
+            'subject': 'Python',
+            'points': 10
+        },
+        {
+            'title': 'Self Parameter',
+            'question_text': 'In a class method definition, what does self usually refer to?',
+            'option_a': 'The class itself',
+            'option_b': 'The module',
+            'option_c': 'The current instance',
+            'option_d': 'A global variable',
+            'correct_answer': 'C',
+            'explanation': 'By convention, self refers to the instance on which the method is called.',
+            'difficulty': 'medium',
+            'topic': 'OOP Basics',
+            'subject': 'Python',
+            'points': 15
+        },
+        {
+            'title': 'Inheritance Basics',
+            'question_text': 'How do you declare that class Dog inherits from Animal?',
+            'option_a': 'class Dog.Animal:',
+            'option_b': 'class Dog -> Animal:',
+            'option_c': 'class Dog(Animal):',
+            'option_d': 'class Dog = Animal:',
+            'correct_answer': 'C',
+            'explanation': 'Subclasses are defined as class Child(Parent): in Python.',
+            'difficulty': 'hard',
+            'topic': 'OOP Basics',
             'subject': 'Python',
             'points': 20
         }

@@ -23,6 +23,16 @@
                 </div>
                 
                 <div class="filter-group">
+                    <label for="q">Search:</label>
+                    <input id="q"
+                           name="q"
+                           type="text"
+                           class="form-control"
+                           placeholder="Search by title or topic"
+                           value="{{ search_query or '' }}">
+                </div>
+                
+                <div class="filter-group">
                     <label for="difficulty">Difficulty:</label>
                     <select id="difficulty" name="difficulty" class="form-control">
                         <option value="">All Difficulties</option>
@@ -155,7 +165,7 @@
             <div class="no-data">
                 <p><strong>No questions available yet.</strong></p>
                 <p>To add sample questions, run:</p>
-                <pre style="background: #f5f5f5; padding: 1rem; border-radius: 6px; display: inline-block; margin-top: 0.5rem;"><code>python init_sample_questions.py</code></pre>
+                <pre style="background: #f5f5f5; padding: 1rem; border-radius: 6px; display: inline-block; margin-top: 0.5rem;"><code>python seed_data.py</code></pre>
                 <p style="margin-top: 1rem;">Or ask an admin to add questions through the admin panel.</p>
                 {% if session.role == 'admin' %}
                 <a href="{{ url_for('admin_add_question') }}" class="btn btn-primary" style="margin-top: 1rem;">

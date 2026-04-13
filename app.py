@@ -339,25 +339,33 @@ def practice():
     # Get filter parameters
     topic = request.args.get('topic', '')
     difficulty = request.args.get('difficulty', '')
+    search_query = request.args.get('q', '').strip()
     
-    # Get user's language track
+    # Get user's language track (fallback safely to Python)
     user = db.execute(
         'SELECT language_track FROM users WHERE id = ?', (user_id,)
     ).fetchone()
-    language_track = user['language_track'] if user else 'python'
+    language_track = (user['language_track'] or 'python') if user and 'language_track' in user.keys() else 'python'
     
-    # Build query - only active questions
+    # Build base query - only active questions for this track (or Python fallback)
     query = '''SELECT id, title, difficulty, topic, points
                FROM questions 
-               WHERE language_track = ? AND is_active = 1'''
+               WHERE language_track IN (?, "python") AND is_active = 1'''
     params = [language_track]
-    
-    if topic:
-        query += ' AND topic = ?'
-        params.append(topic)
-    if difficulty:
-        query += ' AND difficulty = ?'
-        params.append(difficulty)
+
+    # If a search query is provided, search globally across all topics/difficulties
+    if search_query:
+        like_term = f'%{search_query}%'
+        query += ' AND (title LIKE ? OR topic LIKE ?)'
+        params.extend([like_term, like_term])
+    else:
+        # Only apply topic/difficulty filters when NOT searching
+        if topic:
+            query += ' AND topic = ?'
+            params.append(topic)
+        if difficulty:
+            query += ' AND difficulty = ?'
+            params.append(difficulty)
     
     query += ''' ORDER BY topic, 
                      CASE difficulty
@@ -370,7 +378,7 @@ def practice():
     
     # Get unique topics and difficulties for filter (only active questions)
     topics_list = db.execute(
-        'SELECT DISTINCT topic FROM questions WHERE language_track = ? AND is_active = 1 ORDER BY topic',
+        'SELECT DISTINCT topic FROM questions WHERE language_track IN (?, "python") AND is_active = 1 ORDER BY topic',
         (language_track,)
     ).fetchall()
     
@@ -387,16 +395,37 @@ def practice():
                 'hard': []
             }
     
-    # Organize actual questions by topic and difficulty
+    # Helper to normalize difficulty values into buckets used in the UI
+    def map_difficulty(raw):
+        raw = (raw or '').lower()
+        if raw in ('easy', 'beginner'):
+            return 'easy'
+        if raw in ('medium', 'intermediate'):
+            return 'medium'
+        if raw in ('hard', 'advanced'):
+            return 'hard'
+        # Fallback bucket
+        return 'medium'
+
+    # Organize actual questions by topic and normalized difficulty
     for question in questions:
         topic_name = question['topic']
+        norm_diff = map_difficulty(question['difficulty'])
         if topic_name not in questions_by_topic:
             questions_by_topic[topic_name] = {
                 'easy': [],
                 'medium': [],
                 'hard': []
             }
-        questions_by_topic[topic_name][question['difficulty']].append(question)
+        questions_by_topic[topic_name][norm_diff].append(question)
+
+    # When searching, only show topics that actually have at least one question
+    if search_query:
+        filtered_by_topic = {}
+        for t_name, levels in questions_by_topic.items():
+            if (levels['easy'] or levels['medium'] or levels['hard']):
+                filtered_by_topic[t_name] = levels
+        questions_by_topic = filtered_by_topic
     
     difficulties = ['easy', 'medium', 'hard']
     
@@ -406,7 +435,8 @@ def practice():
                          topics=topics_list,
                          difficulties=difficulties,
                          selected_topic=topic,
-                         selected_difficulty=difficulty)
+                         selected_difficulty=difficulty,
+                         search_query=search_query)
 
 
 @app.route('/question/<int:question_id>')
@@ -845,15 +875,16 @@ def admin_questions():
     # Group questions by subject → topic → difficulty for better organization
     questions_by_subject = {}
     for q in questions:
-        subj = q.get('subject', 'Python') or 'Python'
+        # sqlite3.Row does not support .get(), use dict-style access with a safe default
+        subj = q['subject'] if ('subject' in q.keys() and q['subject']) else 'Python'
         top = q['topic']
         diff = q['difficulty']
-        
+
         if subj not in questions_by_subject:
             questions_by_subject[subj] = {}
         if top not in questions_by_subject[subj]:
             questions_by_subject[subj][top] = {'easy': [], 'medium': [], 'hard': []}
-        
+
         questions_by_subject[subj][top][diff].append(q)
     
     return render_template('admin/questions.html',
